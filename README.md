@@ -1,1 +1,1225 @@
-# Resumo-2-monitoramento
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Executivo Interativo - Plano Estratégico SEPM</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #0f172a;
+            --accent: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --info: #2563eb;
+            --info-bg: #eff6ff;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: white;
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .badge-update {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #38bdf8;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .filter-group select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: #fff;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-reset {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: background 0.2s;
+        }
+
+        .btn-reset:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Banner Info */
+        .banner-info {
+            background-color: var(--info-bg);
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Section Title */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .kpi-total::before { background-color: var(--accent); }
+        .kpi-success::before { background-color: var(--success); }
+        .kpi-info::before { background-color: var(--info); }
+        .kpi-danger::before { background-color: var(--danger); }
+        .kpi-rate::before { background-color: #8b5cf6; }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .kpi-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Layout Grids */
+        .row-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+
+        .col-12 { grid-column: span 12; }
+        .col-8 { grid-column: span 8; }
+        .col-7 { grid-column: span 7; }
+        .col-6 { grid-column: span 6; }
+        .col-5 { grid-column: span 5; }
+        .col-4 { grid-column: span 4; }
+
+        @media (max-width: 1024px) {
+            .col-8, .col-7, .col-6, .col-5, .col-4 { grid-column: span 12; }
+        }
+
+        /* Card Container */
+        .content-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Tables */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.03em;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .total-row td {
+            font-weight: 700;
+            background-color: #f1f5f9;
+            border-top: 2px solid var(--border);
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .fill-success { background-color: var(--success); }
+        .fill-warning { background-color: var(--warning); }
+        .fill-danger { background-color: var(--danger); }
+        .fill-primary { background-color: var(--accent); }
+
+        .progress-text {
+            font-size: 0.8rem;
+            font-weight: 700;
+            min-width: 42px;
+            text-align: right;
+        }
+
+        /* Badges & Tags */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-danger { background-color: var(--danger-bg); color: var(--danger); border: 1px solid #fca5a5; }
+        .badge-warning { background-color: var(--warning-bg); color: var(--warning); border: 1px solid #fde68a; }
+        .badge-success { background-color: var(--success-bg); color: var(--success); border: 1px solid #6ee7b7; }
+        .badge-info { background-color: var(--info-bg); color: var(--info); border: 1px solid #93c5fd; }
+
+        /* Metric Boxes */
+        .metric-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .metric-main {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .metric-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Alerts List */
+        .alert-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            background: #fafafa;
+        }
+
+        .alert-item.danger { border-left-color: var(--danger); background-color: var(--danger-bg); }
+        .alert-item.warning { border-left-color: var(--warning); background-color: var(--warning-bg); }
+
+        .alert-info-title { font-size: 0.88rem; font-weight: 600; color: var(--primary-dark); }
+        .alert-info-sub { font-size: 0.78rem; color: var(--text-muted); }
+        .alert-value { font-size: 1.1rem; font-weight: 800; }
+        .danger .alert-value { color: var(--danger); }
+        .warning .alert-value { color: var(--warning); }
+
+        .footer {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+
+    <!-- Header -->
+    <header>
+        <div class="header-title">
+            <h1>🛡️ PLANO ESTRATÉGICO SEPM</h1>
+            <p>Monitoramento de Marcos Estratégicos | 2º Monitoramento e Evolução Frente ao 1º</p>
+        </div>
+        <div class="badge-update">
+            📅 Atualizado em: <strong>07/08/2026</strong>
+        </div>
+    </header>
+
+    <!-- Barra de Filtros Interativos -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label for="filter-periodo">⏳ Período / Visão Temporal</label>
+            <select id="filter-periodo">
+                <option value="ALL">Todos os Períodos</option>
+                <option value="Ciclo Completo">Ciclo Completo (2024)</option>
+                <option value="Metas 2025/2026">Metas 2025/2026</option>
+                <option value="Longo Prazo (2027+)">Longo Prazo (2027+)</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-objetivo">🎯 Objetivo Estratégico</label>
+            <select id="filter-objetivo">
+                <option value="ALL">Todos os Objetivos</option>
+                <option value="Objetivo 1">Objetivo 1 - Fortalecer Efetivo</option>
+                <option value="Objetivo 2">Objetivo 2 - Saúde e Bem-Estar</option>
+                <option value="Objetivo 3">Objetivo 3 - Gestão Logística/Financeira</option>
+                <option value="Objetivo 4">Objetivo 4 - Modernização Tecnológica</option>
+                <option value="Objetivo 5">Objetivo 5 - Infraestrutura / Instalações</option>
+                <option value="Objetivo 6">Objetivo 6 - Transparência / Governança</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-setor">🏢 Setor Responsável</label>
+            <select id="filter-setor">
+                <option value="ALL">Todos os Setores</option>
+                <option value="AAEs/EGE">AAEs/EGE</option>
+                <option value="AAEs/EGQ">AAEs/EGQ</option>
+                <option value="ASCOM">ASCOM</option>
+                <option value="AAES">AAES</option>
+                <option value="CEFD">CEFD</option>
+                <option value="CGPM">CGPM</option>
+                <option value="Controladoria">Controladoria</option>
+                <option value="DGAF">DGAF</option>
+                <option value="DGAF/DOR">DGAF/DOR</option>
+                <option value="DGEC">DGEC</option>
+                <option value="DGO">DGO</option>
+                <option value="DGPROG">DGPROG</option>
+                <option value="DGS">DGS</option>
+                <option value="DGTIC/DIT">DGTIC/DIT</option>
+                <option value="EMG/PM1">EMG/PM1</option>
+                <option value="EMG/PM3">EMG/PM3</option>
+                <option value="EMG/PM4">EMG/PM4</option>
+                <option value="SSGP">SSGP</option>
+            </select>
+        </div>
+
+        <button class="btn-reset" onclick="resetFilters()">🔄 Limpar Filtros</button>
+    </div>
+
+    <!-- Diagnóstico da Janela Temporal -->
+    <div class="banner-info">
+        <span>⏱️ <strong>Diagnóstico da Janela Temporal:</strong> O marco inicial foi estipulado após o lançamento do plano estratégico e contempla um período decorrido de aproximadamente 5 meses de monitoramento efetivo.</span>
+    </div>
+
+    <!-- Resumo Executivo KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card kpi-total">
+            <div class="kpi-label">Total de Marcos</div>
+            <div class="kpi-value" id="kpi-total">610</div>
+            <div class="kpi-sub">Cadastrados na Seleção</div>
+        </div>
+        <div class="kpi-card kpi-success">
+            <div class="kpi-label">Concluídos</div>
+            <div class="kpi-value" id="kpi-concluidos">215</div>
+            <div class="kpi-sub" id="kpi-concluidos-pct">35,2% do Total</div>
+        </div>
+        <div class="kpi-card kpi-info">
+            <div class="kpi-label">No Prazo</div>
+            <div class="kpi-value" id="kpi-noprazo">232</div>
+            <div class="kpi-sub" id="kpi-noprazo-pct">38,0% do Total</div>
+        </div>
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-label">Atrasados</div>
+            <div class="kpi-value" id="kpi-atrasados">163</div>
+            <div class="kpi-sub" id="kpi-atrasados-pct">26,7% do Total</div>
+        </div>
+        <div class="kpi-card kpi-rate">
+            <div class="kpi-label">Taxa de Execução</div>
+            <div class="kpi-value" id="kpi-taxa">35,2%</div>
+            <div class="kpi-sub">Marcos Finalizados</div>
+        </div>
+    </div>
+
+    <!-- Análise de Atrasos & Comparativo Executivo -->
+    <div class="row-grid">
+        <div class="col-6">
+            <div class="content-card">
+                <div class="section-header">
+                    ⚠️ Análise Geral de Atrasos
+                </div>
+                <div class="row-grid" style="gap:12px;">
+                    <div class="col-6">
+                        <div class="metric-box" style="border-left: 4px solid var(--warning);">
+                            <span class="metric-title">Atrasados Iniciados</span>
+                            <span class="metric-main" id="metric-atr-iniciados" style="color: var(--warning);">80 marcos</span>
+                            <span class="metric-desc" id="sub-atr-iniciados">49,1% dos Atrasos</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-box" style="border-left: 4px solid var(--danger);">
+                            <span class="metric-title">Atrasados Não Iniciados</span>
+                            <span class="metric-main" id="metric-atr-nao-iniciados" style="color: var(--danger);">83 marcos</span>
+                            <span class="metric-desc" id="sub-atr-nao-iniciados">50,9% dos Atrasos</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-box">
+                            <span class="metric-title">Média de Dias em Atraso</span>
+                            <span class="metric-main" id="metric-media-dias">206 dias</span>
+                            <span class="metric-desc" style="color: var(--danger);">Requer Acompanhamento</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric-box">
+                            <span class="metric-title">Críticos (> 30 dias)</span>
+                            <span class="metric-main" id="metric-criticos" style="color: var(--danger);">142 marcos</span>
+                            <span class="metric-desc" id="sub-criticos" style="color: var(--danger);">87,1% dos Atrasos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="content-card">
+                <div class="section-header">
+                    📈 Evolução entre o 1º e o 2º Monitoramento
+                </div>
+                <p style="font-size:0.82rem; color:var(--text-muted);">
+                    O 2º monitoramento registra <strong>+16 marcos concluídos</strong> e variação de <strong>+2,6% na taxa de conclusão</strong>. O avanço médio variou <strong>+1,9%</strong>; os atrasos mudaram em <strong>-15 marcos</strong>.
+                </p>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Monitoramento</th>
+                                <th>Concluídos</th>
+                                <th>No Prazo</th>
+                                <th>Atrasados</th>
+                                <th>Taxa Conclusão</th>
+                                <th>Atr. Iniciados</th>
+                                <th>Atr. Não Inic.</th>
+                                <th>Avanço Médio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1º monitoramento</td>
+                                <td>199</td>
+                                <td>233</td>
+                                <td>178</td>
+                                <td>32,6%</td>
+                                <td>98</td>
+                                <td>80</td>
+                                <td>44,9%</td>
+                            </tr>
+                            <tr style="font-weight:700; background-color: var(--success-bg);">
+                                <td>2º monitoramento</td>
+                                <td id="evo-mon2-conc">215</td>
+                                <td id="evo-mon2-prazo">232</td>
+                                <td id="evo-mon2-atr">163</td>
+                                <td id="evo-mon2-taxa">35,2%</td>
+                                <td id="evo-mon2-ini">80</td>
+                                <td id="evo-mon2-nin">83</td>
+                                <td>46,8%</td>
+                            </tr>
+                            <tr style="font-weight:700; color: var(--success);">
+                                <td>Evolução</td>
+                                <td>+16</td>
+                                <td>-1</td>
+                                <td>-15</td>
+                                <td>+2,6%</td>
+                                <td>-18</td>
+                                <td>+3</td>
+                                <td>+1,9%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desempenho Por Objetivo Estratégico -->
+    <div class="row-grid">
+        <div class="col-7">
+            <div class="content-card">
+                <div class="section-header">
+                    🎯 Status por Objetivo Estratégico
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-objetivos">
+                        <thead>
+                            <tr>
+                                <th>Objetivo</th>
+                                <th style="text-align:center;">Total</th>
+                                <th style="text-align:center;">Concluído</th>
+                                <th style="text-align:center;">No Prazo</th>
+                                <th style="text-align:center;">Atrasado</th>
+                                <th>% Exec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinâmico via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-5">
+            <div class="content-card">
+                <div class="section-header">
+                    📊 Desempenho por Objetivo Estratégico (Comparativo)
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Objetivo</th>
+                                <th>1º Monitoramento</th>
+                                <th>2º Monitoramento</th>
+                                <th>Evolução</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Objetivo 1</strong></td><td>44,6%</td><td>51,4%</td><td style="color:var(--success); font-weight:700;">+6,8%</td></tr>
+                            <tr><td><strong>Objetivo 2</strong></td><td>39,3%</td><td>39,3%</td><td>0,0%</td></tr>
+                            <tr><td><strong>Objetivo 3</strong></td><td>45,1%</td><td>41,0%</td><td style="color:var(--danger); font-weight:700;">-4,1%</td></tr>
+                            <tr><td><strong>Objetivo 4</strong></td><td>64,2%</td><td>63,9%</td><td style="color:var(--danger); font-weight:700;">-0,3%</td></tr>
+                            <tr><td><strong>Objetivo 5</strong></td><td>45,6%</td><td>46,2%</td><td style="color:var(--success); font-weight:700;">+0,6%</td></tr>
+                            <tr><td><strong>Objetivo 6</strong></td><td>36,7%</td><td>39,1%</td><td style="color:var(--success); font-weight:700;">+2,4%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Por Setor Responsável & Análise de Atrasos por Setor -->
+    <div class="row-grid">
+        <div class="col-6">
+            <div class="content-card">
+                <div class="section-header">
+                    🏢 Status por Setor Responsável
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-setores">
+                        <thead>
+                            <tr>
+                                <th>Setor</th>
+                                <th style="text-align:center;">Total</th>
+                                <th style="text-align:center;">Conc.</th>
+                                <th style="text-align:center;">Prazo</th>
+                                <th style="text-align:center;">Atr.</th>
+                                <th>% Exec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinâmico via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="content-card">
+                <div class="section-header">
+                    ⚠️ Análise de Atrasos por Setor — 2º Monitoramento
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                    Detalhamento dos marcos atrasados, estágio de execução, criticidade e tempo médio de atraso.
+                </p>
+                <div class="table-responsive">
+                    <table id="tbl-atrasos-setor">
+                        <thead>
+                            <tr>
+                                <th>Setor</th>
+                                <th style="text-align:center;">Atrasados</th>
+                                <th style="text-align:center;">Iniciados</th>
+                                <th style="text-align:center;">Não Inic.</th>
+                                <th style="text-align:center;">Críticos >30d</th>
+                                <th style="text-align:right;">Média Dias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinâmico via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visão Temporal, Alertas, Prioridade e Métricas -->
+    <div class="row-grid">
+        <div class="col-4">
+            <div class="content-card">
+                <div class="section-header">
+                    ⏳ Visão Temporal do Plano
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-temporal">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Total</th>
+                                <th>Conc.</th>
+                                <th>Prazo</th>
+                                <th>Atr.</th>
+                                <th>% Exec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinâmico via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="content-card">
+                <div class="section-header">
+                    📌 Análise por Prioridade
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-prioridade">
+                        <thead>
+                            <tr>
+                                <th>Prioridade</th>
+                                <th>Total</th>
+                                <th>Conc.</th>
+                                <th>Prazo</th>
+                                <th>Atr.</th>
+                                <th>% Exec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinâmico via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="content-card">
+                <div class="section-header">
+                    ⚠️ Alertas de Risco & Recomendações
+                </div>
+                <div class="alert-list">
+                    <div class="alert-item danger">
+                        <div>
+                            <div class="alert-info-title">Atrasados Prioridade Alta</div>
+                            <div class="alert-info-sub">Requer Ação Imediata</div>
+                        </div>
+                        <div class="alert-value" id="alert-alta">73</div>
+                    </div>
+                    <div class="alert-item danger">
+                        <div>
+                            <div class="alert-info-title">Atraso > 90 dias</div>
+                            <div class="alert-info-sub">Gargalo Estrutural</div>
+                        </div>
+                        <div class="alert-value" id="alert-90dias">118</div>
+                    </div>
+                    <div class="alert-item warning">
+                        <div>
+                            <div class="alert-info-title">Obj. com < 20% exec</div>
+                            <div class="alert-info-sub">Objetivo 5 (19,0%)</div>
+                        </div>
+                        <div class="alert-value" id="alert-obj20">1</div>
+                    </div>
+                </div>
+
+                <div class="banner-info" style="margin-top:10px; font-size:0.8rem; background-color:#fff7ed; border-color:#fed7aa; color:#c2410c;">
+                    📌 <strong>Orientação Executiva:</strong> Os setores irão apresentar justificativas nas reuniões.
+                </div>
+
+                <div class="section-header" style="margin-top:10px; font-size:1rem;">
+                    📊 Métricas Adicionais
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <div class="metric-box">
+                        <span class="metric-title">Setor Melhor Taxa</span>
+                        <span class="metric-main" id="metric-best-setor">EMG/PM3</span>
+                        <span class="metric-desc" id="metric-best-val" style="color:var(--success);">85,1% Execução</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-title">Setor Mais Atrasado</span>
+                        <span class="metric-main" id="metric-worst-setor">EMG/PM1</span>
+                        <span class="metric-desc" id="metric-worst-val" style="color:var(--danger);">19 Atrasos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnóstico Setorial Qualitativo -->
+    <div class="row-grid">
+        <div class="col-12">
+            <div class="content-card">
+                <div class="section-header">
+                    📝 Acompanhamento e Diagnóstico Qualitativo por Setor
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-qualitativo">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Setor</th>
+                                <th style="width: 20%;">Marcos / Ações Atualizados</th>
+                                <th style="width: 25%;">Execução no Ciclo</th>
+                                <th style="width: 12%;">Situação Geral</th>
+                                <th style="width: 18%;">Desafios e Riscos</th>
+                                <th style="width: 15%;">Lições / Evidências</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dinâmico via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+        Dashboard Gerado Automaticamente | Fonte: TBL_BASE / Monitoramento Estratégico | Secretaria de Estado de Polícia Militar (SEPM)
+    </div>
+
+</div>
+
+<script>
+// Dataset completo consolidado dos setores e dados
+const dataSetores = [
+    { setor: 'AAEs/EGE', total: 42, conc: 21, prazo: 7, atr: 14, ini: 3, nini: 11, crit: 12, mediaDias: 110 },
+    { setor: 'AAEs/EGQ', total: 15, conc: 2, prazo: 0, atr: 13, ini: 13, nini: 0, crit: 13, mediaDias: 422 },
+    { setor: 'ASCOM', total: 69, conc: 15, prazo: 25, atr: 29, ini: 0, nini: 29, crit: 27, mediaDias: 151 },
+    { setor: 'AAES', total: 24, conc: 0, prazo: 22, atr: 2, ini: 1, nini: 1, crit: 2, mediaDias: 38 },
+    { setor: 'CEFD', total: 20, conc: 2, prazo: 14, atr: 4, ini: 1, nini: 3, crit: 4, mediaDias: 85 },
+    { setor: 'CGPM', total: 28, conc: 0, prazo: 20, atr: 8, ini: 8, nini: 0, crit: 8, mediaDias: 231 },
+    { setor: 'Controladoria', total: 51, conc: 15, prazo: 34, atr: 2, ini: 2, nini: 0, crit: 2, mediaDias: 141 },
+    { setor: 'DGAF', total: 8, conc: 3, prazo: 2, atr: 3, ini: 3, nini: 0, crit: 3, mediaDias: 159 },
+    { setor: 'DGAF/DOR', total: 15, conc: 4, prazo: 10, atr: 1, ini: 0, nini: 1, crit: 1, mediaDias: 280 },
+    { setor: 'DGEC', total: 28, conc: 14, prazo: 9, atr: 5, ini: 2, nini: 3, crit: 5, mediaDias: 175 },
+    { setor: 'DGO', total: 20, conc: 2, prazo: 1, atr: 17, ini: 8, nini: 9, crit: 17, mediaDias: 340 },
+    { setor: 'DGPROG', total: 18, conc: 2, prazo: 7, atr: 9, ini: 6, nini: 3, crit: 9, mediaDias: 317 },
+    { setor: 'DGS', total: 44, conc: 13, prazo: 21, atr: 10, ini: 2, nini: 8, crit: 10, mediaDias: 99 },
+    { setor: 'DGTIC/DIT', total: 36, conc: 7, prazo: 19, atr: 10, ini: 9, nini: 1, crit: 10, mediaDias: 261 },
+    { setor: 'EMG/PM1', total: 35, conc: 4, prazo: 12, atr: 19, ini: 19, nini: 0, crit: 19, mediaDias: 217 },
+    { setor: 'EMG/PM3', total: 47, conc: 40, prazo: 4, atr: 3, ini: 0, nini: 3, crit: 3, mediaDias: 84 },
+    { setor: 'EMG/PM4', total: 38, conc: 17, prazo: 10, atr: 11, ini: 0, nini: 11, crit: 10, mediaDias: 187 },
+    { setor: 'SSGP', total: 72, conc: 54, prazo: 15, atr: 3, ini: 3, nini: 0, crit: 3, mediaDias: 426 }
+];
+
+const dataObjetivos = [
+    { obj: 'Objetivo 1', total: 161, conc: 58, prazo: 65, atr: 38 },
+    { obj: 'Objetivo 2', total: 100, conc: 33, prazo: 36, atr: 31 },
+    { obj: 'Objetivo 3', total: 61, conc: 24, prazo: 22, atr: 15 },
+    { obj: 'Objetivo 4', total: 83, conc: 47, prazo: 23, atr: 13 },
+    { obj: 'Objetivo 5', total: 79, conc: 15, prazo: 54, atr: 10 },
+    { obj: 'Objetivo 6', total: 126, conc: 38, prazo: 32, atr: 56 }
+];
+
+const dataPeriodos = [
+    { periodo: 'Ciclo Completo', total: 12, conc: 8, prazo: 0, atr: 4 },
+    { periodo: 'Metas 2025/2026', total: 433, conc: 200, prazo: 74, atr: 159 },
+    { periodo: 'Longo Prazo (2027+)', total: 165, conc: 7, prazo: 158, atr: 0 }
+];
+
+const dataPrioridades = [
+    { prio: 'Alta', badge: 'badge-danger', total: 129, conc: 62, prazo: 37, atr: 30 },
+    { prio: 'Média-Alta', badge: 'badge-warning', total: 92, conc: 16, prazo: 33, atr: 43 },
+    { prio: 'Média-Baixa', badge: 'badge-info', total: 182, conc: 50, prazo: 89, atr: 43 },
+    { prio: 'Baixa', badge: 'badge-success', total: 169, conc: 70, prazo: 63, atr: 36 },
+    { prio: 'Não classificado', badge: '', total: 38, conc: 17, prazo: 10, atr: 11 }
+];
+
+const dataQualitativo = [
+    {
+        setor: 'DGEC',
+        marcos: 'Marcos 6.5 e 6.6 (Proposta do novo RPCEE). Marcos 6.7 a 6.15 previstos para 2027/2028.',
+        exec: 'Realizadas reuniões finais de alinhamento com seções da DGEC, OAE e Diretor-Geral para proposta do novo decreto. Depende de apreciação do Subsecretário de Gestão Administrativa.',
+        situacao: 'Em andamento dentro do prazo',
+        badgetype: 'badge-info',
+        desafios: 'Alinhamento de agendas com atores externos para reuniões.',
+        evidencias: '<a href="https://docs.google.com/document/d/1eqw2QK7PDR_flqcUNRCHv1f5vTqcNdgrRbzCVoq9jAg/edit?usp=sharing" target="_blank" style="color:var(--accent);">Documento SEI / Evidência</a>'
+    },
+    {
+        setor: 'EMG/PM1',
+        marcos: 'Revisão das normas das escalas de serviço e levantamento para QDE (Marcos 4.4 ao 4.10).',
+        exec: 'Levantamento das ações pela Comissão de Estudo. Publicada no Bol PM 064 de 25/07/2024. Reuniões com Subsecretário Geral e Subsecretário Geral Administrativo.',
+        situacao: 'Em andamento dentro do prazo',
+        badgetype: 'badge-info',
+        desafios: 'Estipulação de Metodologia para o QDE.',
+        evidencias: 'Bol PM 064 de 25/07/2024'
+    },
+    {
+        setor: 'SSGP',
+        marcos: 'DRSP (EPAO, CFO, CFSd, CPM/ERJ) e DRHMI (SIG-DRHMI / Mapeamento).',
+        exec: 'Análise de requisitos da DRHMI atingiu 50%. Absorção de 1.017 Jovens Voluntários e 63 cargos em comissão da folha 8 (Segurança Presente). DRSP em tramitação final/licitação.',
+        situacao: 'Em andamento dentro do prazo',
+        badgetype: 'badge-info',
+        desafios: 'Ações judiciais, proteção de dados e ampliação de escopo funcional.',
+        evidencias: 'Planejamento antecipado reduziu falhas operacionais; digitalização e rastreabilidade dos processos.'
+    },
+    {
+        setor: 'DGO',
+        marcos: 'Criação de escala, liberação de vagas, agenda e aceite de pacientes (OCPM). App Odontopediatria/PCD.',
+        exec: 'Virada de produção em 01/06. Submetido às lojas (Apple/Play Store). Expectativa de liberação completa em agosto.',
+        situacao: 'Em andamento com atraso',
+        badgetype: 'badge-warning',
+        desafios: 'Sincronia de dados com SIDs da DGS. Exigência de vouchers para encaminhamentos.',
+        evidencias: 'Teste e acompanhamento diário do app; concentrar lógica no back-end. Ref: SEI-350008/000508/2026'
+    },
+    {
+        setor: 'CEFD',
+        marcos: 'Revisão das propostas no âmbito do CEFD; Projeto Servir e Proteger.',
+        exec: 'Reunião com DGEC, alinhamento com DGAS e início de alinhamento com o Centro de Fisiatria.',
+        situacao: 'Em andamento com atraso',
+        badgetype: 'badge-warning',
+        desafios: 'Captação de recursos.',
+        evidencias: 'Alinhamento intersetorial em andamento.'
+    },
+    {
+        setor: 'EMG/PM4',
+        marcos: 'Alimentação do novo SisMatBel e implementação.',
+        exec: 'Acordo com SsGA para que a DPAT forneça dados patrimoniais dos armamentos.',
+        situacao: 'Em andamento com atraso',
+        badgetype: 'badge-warning',
+        desafios: 'Efetivo para realizar tombamento e conferência em loco de materiais bélicos.',
+        evidencias: 'Verificar disponibilidade de efetivo antes do projeto. Ref: Bol PM n.º 105 de 13/06/2025'
+    },
+    {
+        setor: 'DGAF',
+        marcos: 'Elaboração da reunião da CEFIPOM digital.',
+        exec: 'Ações de levantamento e desenvolvimento do módulo CEFIPOM (6 etapas). Núcleo operacional consolidado e em testes para Portal PMERJ.',
+        situacao: 'Em andamento com atraso',
+        badgetype: 'badge-warning',
+        desafios: 'Integração com a proposta de criação do SGI.',
+        evidencias: 'Ref: SEI-350005/006599/2026 (Premiação por Boas Práticas – 1º Sem/2026).'
+    },
+    {
+        setor: 'DGAF/DOR',
+        marcos: 'Captação de recursos.',
+        exec: 'Tarefas de captação não se aplicam à DOR (cabendo a AAES e APAR), competindo à DOR a execução dos recursos captados.',
+        situacao: 'Suspensas ou reprogramadas',
+        badgetype: 'badge-info',
+        desafios: 'Adequação de competência regimental.',
+        evidencias: 'Inscrição técnica redirecionada.'
+    },
+    {
+        setor: 'EMG/PM3',
+        marcos: 'Ações 29 (Abordagens), 25 (Op. Áreas Sensíveis) e Marcos 28.7/28.8 (Capacitação CEADPM).',
+        exec: 'Unificação das INs 52/2018 e 70/2024 em escrita preliminar. Início dos marcos após capacitação CEADPM.',
+        situacao: 'Em andamento com atraso',
+        badgetype: 'badge-warning',
+        desafios: 'Redução do efetivo de oficiais do EMG-PM/3 gerando sobrecarga de trabalho. Capacidade da DSI.',
+        evidencias: 'Necessidade de prazos maiores considerando demandas simultâneas. Publicações em Bol PM.'
+    },
+    {
+        setor: 'Controladoria',
+        marcos: 'Instrução, treinamento e métricas de gestão (Planat, Ranat, Fuspon, CNS).',
+        exec: 'Inspeção de conformidade do Fuspon executada e início da CNS conforme planejamento.',
+        situacao: 'Concluídas conforme o planejamento',
+        badgetype: 'badge-success',
+        desafios: 'Efetivo reduzido e necessidade de qualificação do pessoal.',
+        evidencias: 'Ajustes na comunicação para diminuir burocracia. Ref: SEI-350001/014508/2026, 011364/2025, 012238/2026.'
+    },
+    {
+        setor: 'AAEs/EGE',
+        marcos: 'Anuário SEPM 2025.',
+        exec: 'Ajustes na diagramação do Anuário para posterior impressão e lançamento.',
+        situacao: 'Em andamento com atraso',
+        badgetype: 'badge-warning',
+        desafios: 'Retorno e prazo de diagramação.',
+        evidencias: 'Planejamento e cobrança semanal.'
+    }
+];
+
+// Lógica de Filtragem
+function renderDashboard() {
+    const selPeriodo = document.getElementById('filter-periodo').value;
+    const selObjetivo = document.getElementById('filter-objetivo').value;
+    const selSetor = document.getElementById('filter-setor').value;
+
+    // Filtrar Setores
+    let filteredSetores = dataSetores.filter(item => {
+        if (selSetor !== 'ALL' && item.setor !== selSetor) return false;
+        return true;
+    });
+
+    // Recalcular métricas baseadas no filtro de setores
+    let totTotal = 0, totConc = 0, totPrazo = 0, totAtr = 0, totIni = 0, totNini = 0, totCrit = 0;
+    let sumMediaDias = 0;
+
+    filteredSetores.forEach(s => {
+        totTotal += s.total;
+        totConc += s.conc;
+        totPrazo += s.prazo;
+        totAtr += s.atr;
+        totIni += s.ini;
+        totNini += s.nini;
+        totCrit += s.crit;
+        sumMediaDias += (s.mediaDias * s.atr);
+    });
+
+    // Se houver filtro de período ou objetivo, ajustar de acordo proporcionalmente
+    let factor = 1.0;
+    if (selPeriodo !== 'ALL') {
+        const pObj = dataPeriodos.find(p => p.periodo === selPeriodo);
+        if (pObj) factor *= (pObj.total / 610.0);
+    }
+    if (selObjetivo !== 'ALL') {
+        const oObj = dataObjetivos.find(o => o.obj === selObjetivo);
+        if (oObj) factor *= (oObj.total / 610.0);
+    }
+
+    if (selSetor === 'ALL') {
+        totTotal = Math.round(totTotal * factor);
+        totConc = Math.round(totConc * factor);
+        totPrazo = Math.round(totPrazo * factor);
+        totAtr = Math.round(totAtr * factor);
+        totIni = Math.round(totIni * factor);
+        totNini = Math.round(totNini * factor);
+        totCrit = Math.round(totCrit * factor);
+    }
+
+    const pctConc = totTotal > 0 ? ((totConc / totTotal) * 100).toFixed(1) : '0.0';
+    const pctPrazo = totTotal > 0 ? ((totPrazo / totTotal) * 100).toFixed(1) : '0.0';
+    const pctAtr = totTotal > 0 ? ((totAtr / totTotal) * 100).toFixed(1) : '0.0';
+
+    // Atualizar KPIs
+    document.getElementById('kpi-total').innerText = totTotal;
+    document.getElementById('kpi-concluidos').innerText = totConc;
+    document.getElementById('kpi-concluidos-pct').innerText = pctConc + '% do Total';
+    document.getElementById('kpi-noprazo').innerText = totPrazo;
+    document.getElementById('kpi-noprazo-pct').innerText = pctPrazo + '% do Total';
+    document.getElementById('kpi-atrasados').innerText = totAtr;
+    document.getElementById('kpi-atrasados-pct').innerText = pctAtr + '% do Total';
+    document.getElementById('kpi-taxa').innerText = pctConc + '%';
+
+    // Atrasos Geral
+    document.getElementById('metric-atr-iniciados').innerText = totIni + ' marcos';
+    document.getElementById('sub-atr-iniciados').innerText = (totAtr > 0 ? ((totIni/totAtr)*100).toFixed(1) : '0.0') + '% dos Atrasos';
+    document.getElementById('metric-atr-nao-iniciados').innerText = totNini + ' marcos';
+    document.getElementById('sub-atr-nao-iniciados').innerText = (totAtr > 0 ? ((totNini/totAtr)*100).toFixed(1) : '0.0') + '% dos Atrasos';
+    document.getElementById('metric-criticos').innerText = totCrit + ' marcos';
+    document.getElementById('sub-criticos').innerText = (totAtr > 0 ? ((totCrit/totAtr)*100).toFixed(1) : '0.0') + '% dos Atrasos';
+
+    const avgDias = totAtr > 0 ? Math.round(sumMediaDias / (totAtr || 1)) : 0;
+    document.getElementById('metric-media-dias').innerText = (avgDias > 0 ? avgDias : 206) + ' dias';
+
+    // Evolução Mon2
+    document.getElementById('evo-mon2-conc').innerText = totConc;
+    document.getElementById('evo-mon2-prazo').innerText = totPrazo;
+    document.getElementById('evo-mon2-atr').innerText = totAtr;
+    document.getElementById('evo-mon2-taxa').innerText = pctConc + '%';
+    document.getElementById('evo-mon2-ini').innerText = totIni;
+    document.getElementById('evo-mon2-nin').innerText = totNini;
+
+    // Renderizar Tabela Objetivos
+    const tbodyObj = document.querySelector('#tbl-objetivos tbody');
+    tbodyObj.innerHTML = '';
+    dataObjetivos.forEach(o => {
+        if (selObjetivo !== 'ALL' && o.obj !== selObjetivo) return;
+        const execPct = ((o.conc / o.total) * 100).toFixed(1);
+        const fillClass = execPct >= 50 ? 'fill-success' : execPct < 20 ? 'fill-danger' : 'fill-primary';
+        tbodyObj.innerHTML += `
+            <tr>
+                <td><strong>${o.obj}</strong></td>
+                <td style="text-align:center;">${o.total}</td>
+                <td style="text-align:center;">${o.conc}</td>
+                <td style="text-align:center;">${o.prazo}</td>
+                <td style="text-align:center;">${o.atr}</td>
+                <td>
+                    <div class="progress-container">
+                        <div class="progress-bar"><div class="progress-fill ${fillClass}" style="width: ${execPct}%;"></div></div>
+                        <span class="progress-text">${execPct}%</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    // Renderizar Tabela Setores
+    const tbodySetor = document.querySelector('#tbl-setores tbody');
+    tbodySetor.innerHTML = '';
+    filteredSetores.forEach(s => {
+        const execPct = ((s.conc / s.total) * 100).toFixed(1);
+        tbodySetor.innerHTML += `
+            <tr>
+                <td><strong>${s.setor}</strong></td>
+                <td style="text-align:center;">${s.total}</td>
+                <td style="text-align:center;">${s.conc}</td>
+                <td style="text-align:center;">${s.prazo}</td>
+                <td style="text-align:center;">${s.atr}</td>
+                <td>${execPct}%</td>
+            </tr>
+        `;
+    });
+
+    // Renderizar Tabela Atrasos por Setor
+    const tbodyAtrSetor = document.querySelector('#tbl-atrasos-setor tbody');
+    tbodyAtrSetor.innerHTML = '';
+    filteredSetores.forEach(s => {
+        tbodyAtrSetor.innerHTML += `
+            <tr>
+                <td><strong>${s.setor}</strong></td>
+                <td style="text-align:center;">${s.atr}</td>
+                <td style="text-align:center;">${s.ini}</td>
+                <td style="text-align:center;">${s.nini}</td>
+                <td style="text-align:center;">${s.crit}</td>
+                <td style="text-align:right;">${s.mediaDias}</td>
+            </tr>
+        `;
+    });
+
+    // Renderizar Visão Temporal
+    const tbodyTemp = document.querySelector('#tbl-temporal tbody');
+    tbodyTemp.innerHTML = '';
+    dataPeriodos.forEach(p => {
+        if (selPeriodo !== 'ALL' && p.periodo !== selPeriodo) return;
+        const execPct = ((p.conc / p.total) * 100).toFixed(1);
+        tbodyTemp.innerHTML += `
+            <tr>
+                <td><strong>${p.periodo}</strong></td>
+                <td>${p.total}</td>
+                <td>${p.conc}</td>
+                <td>${p.prazo}</td>
+                <td>${p.atr}</td>
+                <td>${execPct}%</td>
+            </tr>
+        `;
+    });
+
+    // Renderizar Prioridade
+    const tbodyPrio = document.querySelector('#tbl-prioridade tbody');
+    tbodyPrio.innerHTML = '';
+    dataPrioridades.forEach(p => {
+        const execPct = ((p.conc / p.total) * 100).toFixed(1);
+        const badgeHtml = p.badge ? `<span class="badge ${p.badge}">${p.prio}</span>` : `<span class="badge" style="background:#e2e8f0; color:#475569;">${p.prio}</span>`;
+        tbodyPrio.innerHTML += `
+            <tr>
+                <td>${badgeHtml}</td>
+                <td>${p.total}</td>
+                <td>${p.conc}</td>
+                <td>${p.prazo}</td>
+                <td>${p.atr}</td>
+                <td>${execPct}%</td>
+            </tr>
+        `;
+    });
+
+    // Renderizar Qualitativo
+    const tbodyQual = document.querySelector('#tbl-qualitativo tbody');
+    tbodyQual.innerHTML = '';
+    dataQualitativo.forEach(q => {
+        if (selSetor !== 'ALL' && q.setor !== selSetor) return;
+        tbodyQual.innerHTML += `
+            <tr>
+                <td><strong>${q.setor}</strong></td>
+                <td>${q.marcos}</td>
+                <td>${q.exec}</td>
+                <td><span class="badge ${q.badgetype}">${q.situacao}</span></td>
+                <td>${q.desafios}</td>
+                <td>${q.evidencias}</td>
+            </tr>
+        `;
+    });
+}
+
+function resetFilters() {
+    document.getElementById('filter-periodo').value = 'ALL';
+    document.getElementById('filter-objetivo').value = 'ALL';
+    document.getElementById('filter-setor').value = 'ALL';
+    renderDashboard();
+}
+
+// Listeners de evento
+document.getElementById('filter-periodo').addEventListener('change', renderDashboard);
+document.getElementById('filter-objetivo').addEventListener('change', renderDashboard);
+document.getElementById('filter-setor').addEventListener('change', renderDashboard);
+
+// Inicializar na carga da página
+renderDashboard();
+</script>
+
+</body>
+</html>
